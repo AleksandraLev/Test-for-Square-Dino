@@ -3,52 +3,65 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    // Таймер для отслеживания времени, когда объект активен
     private float activeTime = 0f;
-    public float maxActiveTime = 60f; // Время в секундах, после которого объект деактивируется
+    public float maxActiveTime = 60f;
     public int damageAmount = 100;
 
-    void OnEnable()
+    private void OnEnable()
     {
-        // Сброс таймера при активации объекта
+        ResetActiveTime();
+    }
+
+    private void Update()
+    {
+        TrackActiveTime();
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        HandleCollision();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        HandleTriggerEnter(other);
+    }
+
+    private void ResetActiveTime()
+    {
         activeTime = 0f;
     }
 
-    void Update()
+    private void TrackActiveTime()
     {
-        // Увеличиваем таймер на время, прошедшее с последнего кадра
         activeTime += Time.deltaTime;
 
-        // Проверяем, прошло ли больше 20 секунд
         if (activeTime >= maxActiveTime)
         {
             Deactivate();
         }
     }
 
-    void OnCollisionEnter(Collision collision)
+    private void HandleCollision()
     {
-        //Debug.Log("Collision detected with: " + collision.gameObject.name);
-        // Когда объект сталкивается с другим коллайдером, деактивируем его
         Deactivate();
     }
 
-    void OnTriggerEnter(Collider other)
+    private void HandleTriggerEnter(Collider other)
     {
-        //Debug.Log("Trigger Collision detected with: " + other.gameObject.name);
-        // Когда объект попадает в триггер, деактивируем его
         Deactivate();
-        if (other.tag == "Enemy")
+
+        if (other.CompareTag("Enemy"))
         {
-            //transform.parent = other.transform;
-            other.GetComponent<Enemy>().TakeDamage(damageAmount);
+            if (other.TryGetComponent<Enemy>(out var enemy))
+            {
+                enemy.TakeDamage(damageAmount);
+            }
         }
     }
 
-    void Deactivate()
+    private void Deactivate()
     {
-        // Деактивация объекта
         gameObject.SetActive(false);
-        //GunController.anyInactive = true;
     }
 }

@@ -4,44 +4,58 @@ using UnityEngine;
 
 public class GunController : MonoBehaviour
 {
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private int poolSize = 20;
+    [SerializeField] private float bulletSpeed = 20f;
+
     private Transform bulletSpawnPoint;
-    public GameObject bulletPrefab;
-    List<GameObject> bulletPool = new List<GameObject>();
-    public int poolSize = 20;
-
-    public float speed = 20;
-
+    private List<GameObject> bulletPool = new List<GameObject>();
     public bool shooting = false;
 
     private void Start()
     {
-        bulletSpawnPoint = GetComponent<Transform>();
-        for (int i = 0; i < poolSize; i++)
-        {
-            GameObject obj = Instantiate(bulletPrefab, bulletSpawnPoint.position, Quaternion.identity);
-            obj.SetActive(false);
-            bulletPool.Add(obj);
-        }
+        bulletSpawnPoint = transform;
+
+        InitializeBulletPool();
     }
 
     private void Update()
     {
         if (Input.GetMouseButton(0) && shooting)
         {
-            GameObject bullet = Take();
-            bullet.GetComponent<Rigidbody>().velocity = bulletSpawnPoint.forward * speed; 
+            Shoot();
         }
     }
 
-    private GameObject Take()
+    private void InitializeBulletPool()
     {
-        foreach (GameObject @object in bulletPool)
+        for (int i = 0; i < poolSize; i++)
         {
-            if (!@object.activeSelf)
+            GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, Quaternion.identity);
+            bullet.SetActive(false);
+            bulletPool.Add(bullet);
+        }
+    }
+
+    private void Shoot()
+    {
+        GameObject bullet = GetInactiveBullet();
+        if (bullet != null)
+        {
+            bullet.transform.position = bulletSpawnPoint.position;
+            bullet.transform.rotation = bulletSpawnPoint.rotation;
+            bullet.SetActive(true);
+            bullet.GetComponent<Rigidbody>().velocity = bulletSpawnPoint.forward * bulletSpeed;
+        }
+    }
+
+    private GameObject GetInactiveBullet()
+    {
+        foreach (GameObject bullet in bulletPool)
+        {
+            if (!bullet.activeSelf)
             {
-                @object.transform.position = bulletSpawnPoint.transform.position;
-                @object.SetActive(true);
-                return @object;
+                return bullet;
             }
         }
         return null;

@@ -5,21 +5,49 @@ using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    public int HP = 100;
-    public Slider healtheBar;
+    [SerializeField] private int maxHP = 100;
+    [SerializeField] private Slider healthBar;
 
-    private void Update()
+    private int currentHP;
+
+    private void Start()
     {
-        healtheBar.value = HP;
+        currentHP = maxHP;
+        UpdateHealthBar();
     }
 
     public void TakeDamage(int damageAmount)
     {
-        HP -= damageAmount;
-        if (HP <= 0)
+        currentHP -= damageAmount;
+        UpdateHealthBar();
+
+        if (currentHP <= 0)
         {
-            //GetComponent<Collider>().enabled = false;
-            healtheBar.gameObject.SetActive(false);
+            Die();
+        }
+    }
+
+    private void UpdateHealthBar()
+    {
+        if (healthBar != null)
+        {
+            healthBar.value = currentHP;
+        }
+    }
+
+    private void Die()
+    {
+        if (healthBar != null)
+        {
+            healthBar.gameObject.SetActive(false);
+        }
+
+        // Отключаем анимацию, если есть Animator
+        Animator animator = GetComponent<Animator>();
+        if (animator != null && animator.enabled)
+        {
+            animator.enabled = false;
+            GameManager.enemyCount++;
         }
     }
 
@@ -28,15 +56,17 @@ public class Enemy : MonoBehaviour
         // Проверяем, если объект столкновения имеет тег "Bullet"
         if (other.CompareTag("Bullet"))
         {
-            // Получаем компонент Animator на текущем объекте
-            Animator animator = GetComponent<Animator>();
-
-            // Если компонент найден, выключаем его
-            if (animator != null && animator.enabled)
+            // Обрабатываем урон от пули
+            Bullet bullet = other.GetComponent<Bullet>();
+            if (bullet != null)
             {
-                animator.enabled = false;
-                GameManager.enemyCount++;
+                TakeDamage(bullet.damageAmount);
             }
+            //if (currentHP <= 0)
+            //{
+            //    // Добавляем к счётчику врагов в GameManager
+            //    GameManager.enemyCount++;
+            //}
         }
     }
 }

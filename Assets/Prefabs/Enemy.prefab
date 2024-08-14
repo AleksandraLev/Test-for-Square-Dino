@@ -1318,8 +1318,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1010c817620e1dd488d577b516b53948, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HP: 100
-  healtheBar: {fileID: 55791613023940675}
+  maxHP: 100
+  healthBar: {fileID: 55791613023940675}
 --- !u!65 &3660033627862266461
 BoxCollider:
   m_ObjectHideFlags: 0

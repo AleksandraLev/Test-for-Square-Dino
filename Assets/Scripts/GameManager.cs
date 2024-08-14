@@ -8,22 +8,51 @@ public class GameManager : MonoBehaviour
     public static int enemyCount = 0;
     public PlayerManager player;
 
-    void Update()
+    private bool enemyCount1 = true;
+    private bool enemyCount2 = true;
+
+    private const int EnemyCountForContinue1 = 2;
+    private const int EnemyCountForContinue2 = 5;
+    private const string SceneName = "Game";
+
+    private void Update()
     {
-        if (enemyCount == 2) 
+        CheckEnemyCount();
+    }
+
+    private void CheckEnemyCount()
+    {
+        if (enemyCount == EnemyCountForContinue1 && enemyCount1) // Можно добавить через "или", какое будет количество побитых врагов, когда игрок победит их на ЧЁТНОЙ платферме.
         {
-            //Вызывем метод из скрипта PlayerMove, чтобы персонаж перещёл на следующую платформу. Точнее меняем значение будевой переменной того скрипта, и это вызывает соответствующий скрипт.
-            player.continue1 = true;
+            OnEnemiesDefeatedForContinue();
+            enemyCount1 = false;
+            enemyCount2 = true;
         }
-        else if (enemyCount == 5)
+        if (enemyCount == EnemyCountForContinue2 && enemyCount2) // Можно добавить через "||", какое будет количество побитых врагов, когда игрок победит их на НЕЧЁТНОЙ платферме.
         {
-            Invoke("Restart", 3); //Пререзагрузка сцены запускается с задержкой, чтобы это происходило не слишком резко
-            enemyCount = 0;
+            OnEnemiesDefeatedForContinue();
+            enemyCount1 = true;
+            enemyCount2 = false;
+        }
+        else if (player.finish)
+        {
+            OnEnemiesDefeatedForRestart();
         }
     }
 
-    void Restart()
+    private void OnEnemiesDefeatedForContinue()
     {
-        SceneManager.LoadScene("Game");
+        player.myContinue = true;
+    }
+
+    private void OnEnemiesDefeatedForRestart()
+    {
+        enemyCount = 0;
+        Invoke(nameof(RestartGame), 1f); // Задержка перед перезапуском сцены
+    }
+
+    private void RestartGame()
+    {
+        SceneManager.LoadScene(SceneName);
     }
 }
